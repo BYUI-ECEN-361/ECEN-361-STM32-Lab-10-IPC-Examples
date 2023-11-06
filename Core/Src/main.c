@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "MultiFunctionShield.h"
+#include <stdio.h>
+#include <strings.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +39,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -52,17 +54,17 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for Semaphore_Toggl */
-osThreadId_t Semaphore_TogglHandle;
-const osThreadAttr_t Semaphore_Toggl_attributes = {
-  .name = "Semaphore_Toggl",
+/* Definitions for SemaphoreToggle */
+osThreadId_t SemaphoreToggleHandle;
+const osThreadAttr_t SemaphoreToggle_attributes = {
+  .name = "SemaphoreToggle",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for Notification_To */
-osThreadId_t Notification_ToHandle;
-const osThreadAttr_t Notification_To_attributes = {
-  .name = "Notification_To",
+/* Definitions for NotifToggle */
+osThreadId_t NotifToggleHandle;
+const osThreadAttr_t NotifToggle_attributes = {
+  .name = "NotifToggle",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -98,9 +100,9 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM17_Init(void);
 void StartDefaultTask(void *argument);
-void StartTask02(void *argument);
-void StartTask03(void *argument);
-void StartTask04(void *argument);
+void SemaphoreToggle_Task(void *argument);
+void NotifyToggleTask(void *argument);
+void SW_Timer_Task(void *argument);
 void SW_Timer_Toggle_LED(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -143,6 +145,18 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
+  printf("\033\143"); printf("Welcome to ECEN-361 Lab-09\n\r");
+	// Start timer
+	MultiFunctionShield_Clear();							// Clear the 7-seg display
+	HAL_TIM_Base_Start_IT(&htim17);							// LED SevenSeg cycle thru them
+	MultiFunctionShield_Clear();							// Clear the 7-seg display
+	//MultiFunctionShield_Single_Digit_Display (4, 4);
+	//MultiFunctionShield_Single_Digit_Display (2, 2);
+	//MultiFunctionShield_Single_Digit_Display (3, 3);
+	MultiFunctionShield_Display (1234);
+
+
+	Clear_LEDs();
 
   /* USER CODE END 2 */
 
@@ -155,10 +169,10 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of Button_1_Semaphore_Binary */
-  Button_1_Semaphore_BinaryHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_Binary_attributes);
+  Button_1_Semaphore_BinaryHandle = osSemaphoreNew(1, 0, &Button_1_Semaphore_Binary_attributes);
 
   /* creation of Button_3_Semaphore_Counting */
-  Button_3_Semaphore_CountingHandle = osSemaphoreNew(2, 2, &Button_3_Semaphore_Counting_attributes);
+  Button_3_Semaphore_CountingHandle = osSemaphoreNew(31, 31, &Button_3_Semaphore_Counting_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -180,14 +194,14 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of Semaphore_Toggl */
-  Semaphore_TogglHandle = osThreadNew(StartTask02, NULL, &Semaphore_Toggl_attributes);
+  /* creation of SemaphoreToggle */
+  SemaphoreToggleHandle = osThreadNew(SemaphoreToggle_Task, NULL, &SemaphoreToggle_attributes);
 
-  /* creation of Notification_To */
-  Notification_ToHandle = osThreadNew(StartTask03, NULL, &Notification_To_attributes);
+  /* creation of NotifToggle */
+  NotifToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifToggle_attributes);
 
   /* creation of SW_Timer_Toggle */
-  SW_Timer_ToggleHandle = osThreadNew(StartTask04, NULL, &SW_Timer_Toggle_attributes);
+  SW_Timer_ToggleHandle = osThreadNew(SW_Timer_Task, NULL, &SW_Timer_Toggle_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -426,6 +440,45 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+	{
+	// All three buttons generate GPIO  interrupts
+	switch(GPIO_Pin)
+		{
+		case Button_1_Pin:
+			// Got the pin -- Give the semaphore
+			osSemaphoreRelease(Button_1_Semaphore_BinaryHandle);
+			break;
+
+		case Button_2_Pin:
+			break;
+
+		case Button_3_Pin:
+			break;
+		}
+
+	}
+
+
+
+
+/**
+  * @brief  Retargets the C library printf function to the USART.
+  * @param  None
+  * @retval None
+  */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+
+
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -446,58 +499,61 @@ void StartDefaultTask(void *argument)
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_StartTask02 */
+/* USER CODE BEGIN Header_SemaphoreToggle_Task */
 /**
-* @brief Function implementing the Semaphore_Toggl thread.
+* @brief Function implementing the SemaphoreToggle thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTask02 */
-void StartTask02(void *argument)
+/* USER CODE END Header_SemaphoreToggle_Task */
+void SemaphoreToggle_Task(void *argument)
 {
-  /* USER CODE BEGIN StartTask02 */
+  /* USER CODE BEGIN SemaphoreToggle_Task */
+  /* Infinite loop */
+#define delaytime 500 		//in milliseconds
+  for(;;)
+  {
+	osSemaphoreAcquire(Button_1_Semaphore_BinaryHandle,100000);
+	HAL_GPIO_TogglePin(LED_D1_GPIO_Port , LED_D1_Pin);
+	osDelay(1);
+  }
+  /* USER CODE END SemaphoreToggle_Task */
+}
+
+/* USER CODE BEGIN Header_NotifyToggleTask */
+/**
+* @brief Function implementing the NotifToggle thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_NotifyToggleTask */
+void NotifyToggleTask(void *argument)
+{
+  /* USER CODE BEGIN NotifyToggleTask */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartTask02 */
+  /* USER CODE END NotifyToggleTask */
 }
 
-/* USER CODE BEGIN Header_StartTask03 */
-/**
-* @brief Function implementing the Notification_To thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask03 */
-void StartTask03(void *argument)
-{
-  /* USER CODE BEGIN StartTask03 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartTask03 */
-}
-
-/* USER CODE BEGIN Header_StartTask04 */
+/* USER CODE BEGIN Header_SW_Timer_Task */
 /**
 * @brief Function implementing the SW_Timer_Toggle thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTask04 */
-void StartTask04(void *argument)
+/* USER CODE END Header_SW_Timer_Task */
+void SW_Timer_Task(void *argument)
 {
-  /* USER CODE BEGIN StartTask04 */
+  /* USER CODE BEGIN SW_Timer_Task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartTask04 */
+  /* USER CODE END SW_Timer_Task */
 }
 
 /* SW_Timer_Toggle_LED function */
