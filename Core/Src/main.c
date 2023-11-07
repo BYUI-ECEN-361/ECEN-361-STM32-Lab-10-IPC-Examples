@@ -2,16 +2,13 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
+  * @brief          : ECEN-361-Lab-09
+  * IPC examples
   *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
+  * BYU-Idaho
+  * Fall-2023 :   Lynn Watson
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * See the  STUDENTS EDITABLE places below to modify for submission
   *
   ******************************************************************************
   */
@@ -75,15 +72,20 @@ const osThreadAttr_t SW_Timer_Toggle_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for SW_Timer_LD3 */
-osTimerId_t SW_Timer_LD3Handle;
-const osTimerAttr_t SW_Timer_LD3_attributes = {
-  .name = "SW_Timer_LD3"
+/* Definitions for SW_Timer_7Seg */
+osTimerId_t SW_Timer_7SegHandle;
+const osTimerAttr_t SW_Timer_7Seg_attributes = {
+  .name = "SW_Timer_7Seg"
 };
 /* Definitions for Button_1_Semaphore_Binary */
 osSemaphoreId_t Button_1_Semaphore_BinaryHandle;
 const osSemaphoreAttr_t Button_1_Semaphore_Binary_attributes = {
   .name = "Button_1_Semaphore_Binary"
+};
+/* Definitions for Button_2_Semaphore_Binary */
+osSemaphoreId_t Button_2_Semaphore_BinaryHandle;
+const osSemaphoreAttr_t Button_2_Semaphore_Binary_attributes = {
+  .name = "Button_2_Semaphore_Binary"
 };
 /* Definitions for Button_3_Semaphore_Counting */
 osSemaphoreId_t Button_3_Semaphore_CountingHandle;
@@ -91,6 +93,8 @@ const osSemaphoreAttr_t Button_3_Semaphore_Counting_attributes = {
   .name = "Button_3_Semaphore_Counting"
 };
 /* USER CODE BEGIN PV */
+
+int countdown_display = 99;
 
 /* USER CODE END PV */
 
@@ -103,7 +107,7 @@ void StartDefaultTask(void *argument);
 void SemaphoreToggle_Task(void *argument);
 void NotifyToggleTask(void *argument);
 void SW_Timer_Task(void *argument);
-void SW_Timer_Toggle_LED(void *argument);
+void SW_Timer_Countdown(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -149,12 +153,6 @@ int main(void)
 	// Start timer
 	MultiFunctionShield_Clear();							// Clear the 7-seg display
 	HAL_TIM_Base_Start_IT(&htim17);							// LED SevenSeg cycle thru them
-	MultiFunctionShield_Clear();							// Clear the 7-seg display
-	//MultiFunctionShield_Single_Digit_Display (4, 4);
-	//MultiFunctionShield_Single_Digit_Display (2, 2);
-	//MultiFunctionShield_Single_Digit_Display (3, 3);
-	MultiFunctionShield_Display (1234);
-
 
 	Clear_LEDs();
 
@@ -169,7 +167,10 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of Button_1_Semaphore_Binary */
-  Button_1_Semaphore_BinaryHandle = osSemaphoreNew(1, 0, &Button_1_Semaphore_Binary_attributes);
+  Button_1_Semaphore_BinaryHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_Binary_attributes);
+
+  /* creation of Button_2_Semaphore_Binary */
+  Button_2_Semaphore_BinaryHandle = osSemaphoreNew(1, 1, &Button_2_Semaphore_Binary_attributes);
 
   /* creation of Button_3_Semaphore_Counting */
   Button_3_Semaphore_CountingHandle = osSemaphoreNew(31, 31, &Button_3_Semaphore_Counting_attributes);
@@ -179,8 +180,8 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* Create the timer(s) */
-  /* creation of SW_Timer_LD3 */
-  SW_Timer_LD3Handle = osTimerNew(SW_Timer_Toggle_LED, osTimerPeriodic, NULL, &SW_Timer_LD3_attributes);
+  /* creation of SW_Timer_7Seg */
+  SW_Timer_7SegHandle = osTimerNew(SW_Timer_Countdown, osTimerPeriodic, NULL, &SW_Timer_7Seg_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -451,6 +452,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			break;
 
 		case Button_2_Pin:
+			osSemaphoreRelease(Button_2_Semaphore_BinaryHandle);
 			break;
 
 		case Button_3_Pin:
@@ -551,17 +553,36 @@ void SW_Timer_Task(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	osSemaphoreAcquire(Button_2_Semaphore_BinaryHandle,100000);
+	  // A button push starts or stops the SW Timer
+	  // Button push is indicated by the semaphore
+	if (osTimerIsRunning(SW_Timer_7SegHandle))
+		osTimerStop(SW_Timer_7SegHandle );
+	else
+		osTimerStart(SW_Timer_7SegHandle , 10);
     osDelay(1);
   }
   /* USER CODE END SW_Timer_Task */
 }
 
-/* SW_Timer_Toggle_LED function */
-void SW_Timer_Toggle_LED(void *argument)
+/* SW_Timer_Countdown function */
+void SW_Timer_Countdown(void *argument)
 {
-  /* USER CODE BEGIN SW_Timer_Toggle_LED */
+  /* USER CODE BEGIN SW_Timer_Countdown */
 
-  /* USER CODE END SW_Timer_Toggle_LED */
+	/*
+	 * When the timer expires, decrement the Count and Display it
+	 * on the 7-Seg Upper
+	 */
+
+	if (countdown_display == 0) countdown_display = 99;
+		else countdown_display--;
+
+	MultiFunctionShield_Display(countdown_display << 2);  // Put them on the left 2
+	MultiFunctionShield_Single_Digit_Display(0, -1);//blank the bottom two
+	MultiFunctionShield_Single_Digit_Display(1, -1);
+
+  /* USER CODE END SW_Timer_Countdown */
 }
 
 /**
@@ -581,6 +602,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+  if (htim == &htim17 )
+  {
+	  MultiFunctionShield__ISRFunc();
+  }
 
   /* USER CODE END Callback 1 */
 }

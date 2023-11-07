@@ -74,15 +74,22 @@ const uint8_t BLANK_OR_ZERO_FILL = SEGMENT_ZERO;
 */
 void MultiFunctionShield_Single_Digit_Display (int digit, int8_t value)
 	{
-	value = (value & 0b1111) % 10 ;
-	if ((digit <=4 ) && (digit >=0))
-		SEGMENT_VALUE[4-digit] = SEGMENT_MAP [(uint8_t) (value % 10)];
-	else
-	{
-		SEGMENT_VALUE[0] = SEGMENT_MINUS;
-		SEGMENT_VALUE[1] = SEGMENT_MINUS;
-		SEGMENT_VALUE[2] = SEGMENT_MINUS;
-		SEGMENT_VALUE[3] = SEGMENT_MINUS;
+	if (value <0) //then blank a digit
+		{
+		SEGMENT_VALUE[4-digit] = SEGMENT_BLANK;
+		}
+	else   //Normal value
+		{
+		value = (value & 0b1111) % 10 ;
+		if ((digit <=4 ) && (digit >=0))
+			SEGMENT_VALUE[4-digit] = SEGMENT_MAP [(uint8_t) (value % 10)];
+		else
+		{
+			SEGMENT_VALUE[0] = SEGMENT_MINUS;
+			SEGMENT_VALUE[1] = SEGMENT_MINUS;
+			SEGMENT_VALUE[2] = SEGMENT_MINUS;
+			SEGMENT_VALUE[3] = SEGMENT_MINUS;
+			}
 		}
 	}
 
