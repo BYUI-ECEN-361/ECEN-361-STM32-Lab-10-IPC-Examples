@@ -70,6 +70,11 @@ osTimerId_t SW_Timer_7SegHandle;
 const osTimerAttr_t SW_Timer_7Seg_attributes = {
   .name = "SW_Timer_7Seg"
 };
+/* Definitions for UpDownMutex */
+osMutexId_t UpDownMutexHandle;
+const osMutexAttr_t UpDownMutex_attributes = {
+  .name = "UpDownMutex"
+};
 /* Definitions for Button_1_Semaphore_Binary */
 osSemaphoreId_t Button_1_Semaphore_BinaryHandle;
 const osSemaphoreAttr_t Button_1_Semaphore_Binary_attributes = {
@@ -152,6 +157,9 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of UpDownMutex */
+  UpDownMutexHandle = osMutexNew(&UpDownMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -493,10 +501,9 @@ void Semaphore_Toggle_Task(void *argument)
 		osDelay(1);
 	  }
 	  /* USER CODE END SemaphoreToggle_Task */
-}
-
 
   /* USER CODE END 5 */
+}
 
 /* USER CODE BEGIN Header_NotifyToggleTask */
 /**
@@ -551,12 +558,11 @@ void SW_Timer_Countdown(void *argument)
 	 * on the 7-Seg Upper
 	 */
 
-	if (countdown_display == 0) countdown_display = 99;
+	if (countdown_display == 0) countdown_display = 9;
 		else countdown_display--;
 
-	MultiFunctionShield_Display(countdown_display * 100 );  // Put them on the left 2
-	MultiFunctionShield_Single_Digit_Display(2, -1);//blank the bottom two
-	MultiFunctionShield_Single_Digit_Display(1, -1);
+	MultiFunctionShield_Single_Digit_Display(4, countdown_display);   //put it on the left
+	// MultiFunctionShield_Single_Digit_Display(2, -1);//blank the bottom two
 
   /* USER CODE END SW_Timer_Countdown */
 }
