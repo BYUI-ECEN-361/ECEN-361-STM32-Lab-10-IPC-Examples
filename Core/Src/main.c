@@ -65,6 +65,20 @@ const osThreadAttr_t SW_Timer_Toggle_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for Mutex_CountUp */
+osThreadId_t Mutex_CountUpHandle;
+const osThreadAttr_t Mutex_CountUp_attributes = {
+  .name = "Mutex_CountUp",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for Mutex_CountDown */
+osThreadId_t Mutex_CountDownHandle;
+const osThreadAttr_t Mutex_CountDown_attributes = {
+  .name = "Mutex_CountDown",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for SW_Timer_7Seg */
 osTimerId_t SW_Timer_7SegHandle;
 const osTimerAttr_t SW_Timer_7Seg_attributes = {
@@ -75,20 +89,25 @@ osMutexId_t UpDownMutexHandle;
 const osMutexAttr_t UpDownMutex_attributes = {
   .name = "UpDownMutex"
 };
-/* Definitions for Button_1_Semaphore_Binary */
-osSemaphoreId_t Button_1_Semaphore_BinaryHandle;
-const osSemaphoreAttr_t Button_1_Semaphore_Binary_attributes = {
-  .name = "Button_1_Semaphore_Binary"
+/* Definitions for Button_1_Semaphore */
+osSemaphoreId_t Button_1_SemaphoreHandle;
+const osSemaphoreAttr_t Button_1_Semaphore_attributes = {
+  .name = "Button_1_Semaphore"
 };
-/* Definitions for Button_2_Semaphore_Binary */
-osSemaphoreId_t Button_2_Semaphore_BinaryHandle;
-const osSemaphoreAttr_t Button_2_Semaphore_Binary_attributes = {
-  .name = "Button_2_Semaphore_Binary"
+/* Definitions for Button_2_Semaphore */
+osSemaphoreId_t Button_2_SemaphoreHandle;
+const osSemaphoreAttr_t Button_2_Semaphore_attributes = {
+  .name = "Button_2_Semaphore"
 };
-/* Definitions for Button_3_Semaphore_Counting */
-osSemaphoreId_t Button_3_Semaphore_CountingHandle;
-const osSemaphoreAttr_t Button_3_Semaphore_Counting_attributes = {
-  .name = "Button_3_Semaphore_Counting"
+/* Definitions for Button_3_Semaphore */
+osSemaphoreId_t Button_3_SemaphoreHandle;
+const osSemaphoreAttr_t Button_3_Semaphore_attributes = {
+  .name = "Button_3_Semaphore"
+};
+/* Definitions for Semaphore_Counting */
+osSemaphoreId_t Semaphore_CountingHandle;
+const osSemaphoreAttr_t Semaphore_Counting_attributes = {
+  .name = "Semaphore_Counting"
 };
 /* USER CODE BEGIN PV */
 
@@ -104,6 +123,8 @@ static void MX_TIM17_Init(void);
 void Semaphore_Toggle_Task(void *argument);
 void NotifyToggleTask(void *argument);
 void SW_Timer_Task(void *argument);
+void Mutex_CountUpTask(void *argument);
+void Mutex_CountDownTask(void *argument);
 void SW_Timer_Countdown(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -166,14 +187,17 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* creation of Button_1_Semaphore_Binary */
-  Button_1_Semaphore_BinaryHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_Binary_attributes);
+  /* creation of Button_1_Semaphore */
+  Button_1_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_attributes);
 
-  /* creation of Button_2_Semaphore_Binary */
-  Button_2_Semaphore_BinaryHandle = osSemaphoreNew(1, 1, &Button_2_Semaphore_Binary_attributes);
+  /* creation of Button_2_Semaphore */
+  Button_2_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_2_Semaphore_attributes);
 
-  /* creation of Button_3_Semaphore_Counting */
-  Button_3_Semaphore_CountingHandle = osSemaphoreNew(31, 31, &Button_3_Semaphore_Counting_attributes);
+  /* creation of Button_3_Semaphore */
+  Button_3_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_3_Semaphore_attributes);
+
+  /* creation of Semaphore_Counting */
+  Semaphore_CountingHandle = osSemaphoreNew(31, 31, &Semaphore_Counting_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -200,6 +224,12 @@ int main(void)
 
   /* creation of SW_Timer_Toggle */
   SW_Timer_ToggleHandle = osThreadNew(SW_Timer_Task, NULL, &SW_Timer_Toggle_attributes);
+
+  /* creation of Mutex_CountUp */
+  Mutex_CountUpHandle = osThreadNew(Mutex_CountUpTask, NULL, &Mutex_CountUp_attributes);
+
+  /* creation of Mutex_CountDown */
+  Mutex_CountDownHandle = osThreadNew(Mutex_CountDownTask, NULL, &Mutex_CountDown_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -445,14 +475,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 		case Button_1_Pin:
 			// Got the pin -- Give the semaphore
-			osSemaphoreRelease(Button_1_Semaphore_BinaryHandle);
+			osSemaphoreRelease(Button_1_SemaphoreHandle);
 			break;
 
 		case Button_2_Pin:
-			osSemaphoreRelease(Button_2_Semaphore_BinaryHandle);
+			osSemaphoreRelease(Button_2_SemaphoreHandle);
 			break;
 
 		case Button_3_Pin:
+			osSemaphoreRelease(Button_3_SemaphoreHandle);
 			break;
 		}
 
@@ -496,7 +527,7 @@ void Semaphore_Toggle_Task(void *argument)
 	  /* Infinite loop */
 	  for(;;)
 	  {
-		osSemaphoreAcquire(Button_1_Semaphore_BinaryHandle,100000);
+		osSemaphoreAcquire(Button_1_SemaphoreHandle,100000);
 		HAL_GPIO_TogglePin(LED_D4_GPIO_Port , LED_D4_Pin);
 		osDelay(1);
 	  }
@@ -536,7 +567,7 @@ void SW_Timer_Task(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreAcquire(Button_2_Semaphore_BinaryHandle,100000);
+	osSemaphoreAcquire(Button_2_SemaphoreHandle,100000);
 	  // A button push starts or stops the SW Timer
 	  // Button push is indicated by the semaphore
 	if (osTimerIsRunning(SW_Timer_7SegHandle))
@@ -546,6 +577,45 @@ void SW_Timer_Task(void *argument)
     osDelay(1);
   }
   /* USER CODE END SW_Timer_Task */
+}
+
+/* USER CODE BEGIN Header_Mutex_CountUpTask */
+/**
+* @brief Function implementing the Mutex_CountUp thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Mutex_CountUpTask */
+void Mutex_CountUpTask(void *argument)
+{
+  /* USER CODE BEGIN Mutex_CountUpTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	  osMutexWait(UpDownMutexHandle,100000);
+	  // Once we have it, we can start counting down
+
+    osDelay(1);
+  }
+  /* USER CODE END Mutex_CountUpTask */
+}
+
+/* USER CODE BEGIN Header_Mutex_CountDownTask */
+/**
+* @brief Function implementing the Mutex_CountDown thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Mutex_CountDownTask */
+void Mutex_CountDownTask(void *argument)
+{
+  /* USER CODE BEGIN Mutex_CountDownTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Mutex_CountDownTask */
 }
 
 /* SW_Timer_Countdown function */
