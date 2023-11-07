@@ -44,19 +44,12 @@ TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for SemaphoreToggle */
 osThreadId_t SemaphoreToggleHandle;
 const osThreadAttr_t SemaphoreToggle_attributes = {
   .name = "SemaphoreToggle",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for NotifToggle */
 osThreadId_t NotifToggleHandle;
@@ -103,8 +96,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM17_Init(void);
-void StartDefaultTask(void *argument);
-void SemaphoreToggle_Task(void *argument);
+void Semaphore_Toggle_Task(void *argument);
 void NotifyToggleTask(void *argument);
 void SW_Timer_Task(void *argument);
 void SW_Timer_Countdown(void *argument);
@@ -192,11 +184,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
   /* creation of SemaphoreToggle */
-  SemaphoreToggleHandle = osThreadNew(SemaphoreToggle_Task, NULL, &SemaphoreToggle_attributes);
+  SemaphoreToggleHandle = osThreadNew(Semaphore_Toggle_Task, NULL, &SemaphoreToggle_attributes);
 
   /* creation of NotifToggle */
   NotifToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifToggle_attributes);
@@ -483,44 +472,31 @@ PUTCHAR_PROTOTYPE
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_Semaphore_Toggle_Task */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the SemaphoreToggle thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_Semaphore_Toggle_Task */
+void Semaphore_Toggle_Task(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
+
+	  /* USER CODE BEGIN SemaphoreToggle_Task */
+	  /* Infinite loop */
+	  for(;;)
+	  {
+		osSemaphoreAcquire(Button_1_Semaphore_BinaryHandle,100000);
+		HAL_GPIO_TogglePin(LED_D4_GPIO_Port , LED_D4_Pin);
+		osDelay(1);
+	  }
+	  /* USER CODE END SemaphoreToggle_Task */
 }
 
-/* USER CODE BEGIN Header_SemaphoreToggle_Task */
-/**
-* @brief Function implementing the SemaphoreToggle thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_SemaphoreToggle_Task */
-void SemaphoreToggle_Task(void *argument)
-{
-  /* USER CODE BEGIN SemaphoreToggle_Task */
-  /* Infinite loop */
-#define delaytime 500 		//in milliseconds
-  for(;;)
-  {
-	osSemaphoreAcquire(Button_1_Semaphore_BinaryHandle,100000);
-	HAL_GPIO_TogglePin(LED_D1_GPIO_Port , LED_D1_Pin);
-	osDelay(1);
-  }
-  /* USER CODE END SemaphoreToggle_Task */
-}
+
+  /* USER CODE END 5 */
 
 /* USER CODE BEGIN Header_NotifyToggleTask */
 /**
@@ -559,7 +535,7 @@ void SW_Timer_Task(void *argument)
 	if (osTimerIsRunning(SW_Timer_7SegHandle))
 		osTimerStop(SW_Timer_7SegHandle );
 	else
-		osTimerStart(SW_Timer_7SegHandle , 10);
+		osTimerStart(SW_Timer_7SegHandle , 200);
     osDelay(1);
   }
   /* USER CODE END SW_Timer_Task */
@@ -578,8 +554,8 @@ void SW_Timer_Countdown(void *argument)
 	if (countdown_display == 0) countdown_display = 99;
 		else countdown_display--;
 
-	MultiFunctionShield_Display(countdown_display << 2);  // Put them on the left 2
-	MultiFunctionShield_Single_Digit_Display(0, -1);//blank the bottom two
+	MultiFunctionShield_Display(countdown_display * 100 );  // Put them on the left 2
+	MultiFunctionShield_Single_Digit_Display(2, -1);//blank the bottom two
 	MultiFunctionShield_Single_Digit_Display(1, -1);
 
   /* USER CODE END SW_Timer_Countdown */
