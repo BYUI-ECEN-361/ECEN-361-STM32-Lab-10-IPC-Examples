@@ -13,6 +13,6 @@
 ../Core/Src/main.c:662:6:Mutex_CountDownTask	2
 ../Core/Src/main.c:687:6:UpdateGlobDisplayProcess	1
 ../Core/Src/main.c:710:6:ResetGlobalTask	1
-../Core/Src/main.c:731:6:SW_Timer_Countdown	2
-../Core/Src/main.c:757:6:HAL_TIM_PeriodElapsedCallback	3
-../Core/Src/main.c:778:6:Error_Handler	1
+../Core/Src/main.c:732:6:SW_Timer_Countdown	2
+../Core/Src/main.c:758:6:HAL_TIM_PeriodElapsedCallback	3
+../Core/Src/main.c:779:6:Error_Handler	1
