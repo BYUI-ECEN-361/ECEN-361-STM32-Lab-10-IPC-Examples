@@ -81,6 +81,20 @@ const osThreadAttr_t Mutex_CountDown_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for UpdateGlobDisp */
+osThreadId_t UpdateGlobDispHandle;
+const osThreadAttr_t UpdateGlobDisp_attributes = {
+  .name = "UpdateGlobDisp",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for ResetGlobal */
+osThreadId_t ResetGlobalHandle;
+const osThreadAttr_t ResetGlobal_attributes = {
+  .name = "ResetGlobal",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for SW_Timer_7Seg */
 osTimerId_t SW_Timer_7SegHandle;
 const osTimerAttr_t SW_Timer_7Seg_attributes = {
@@ -120,7 +134,8 @@ uint8_t countdown_display = 9;
  * But should not change, because all writers must have the mutex
  *
  */
-uint8_t mutex_protected_count = 0;
+#define Protected_Count_Initial_Value 50
+uint8_t mutex_protected_count = Protected_Count_Initial_Value ;
 
 
 /* USER CODE END PV */
@@ -135,6 +150,8 @@ void NotifyToggleTask(void *argument);
 void SW_Timer_Task(void *argument);
 void Mutex_CountUpTask(void *argument);
 void Mutex_CountDownTask(void *argument);
+void UpdateGlobDisplayProcess(void *argument);
+void ResetGlobalTask(void *argument);
 void SW_Timer_Countdown(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -177,13 +194,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-  printf("\033\143"); printf("Welcome to ECEN-361 Lab-09\n\r");
+  printf("\033\143"); printf("Welcome to ECEN-361 Lab-09, <student>\n\r");
 	// Start timer
 	MultiFunctionShield_Clear();							// Clear the 7-seg display
 	HAL_TIM_Base_Start_IT(&htim17);							// LED SevenSeg cycle thru them
-
 	Clear_LEDs();
-	MultiFunctionShield_Display_Two_Digits(56);
 
 
   /* USER CODE END 2 */
@@ -242,6 +257,12 @@ int main(void)
 
   /* creation of Mutex_CountDown */
   Mutex_CountDownHandle = osThreadNew(Mutex_CountDownTask, NULL, &Mutex_CountDown_attributes);
+
+  /* creation of UpdateGlobDisp */
+  UpdateGlobDispHandle = osThreadNew(UpdateGlobDisplayProcess, NULL, &UpdateGlobDisp_attributes);
+
+  /* creation of ResetGlobal */
+  ResetGlobalHandle = osThreadNew(ResetGlobalTask, NULL, &ResetGlobal_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -520,13 +541,13 @@ PUTCHAR_PROTOTYPE
 }
 
 
-int random_wait()
+int random_wait(int min)
 	{
 	/* Return a random number between 200 - 300
 	 * Meant to be mS for the count up or count down in the protected
 	 * mutex demonstration routines
 	 */
-	int rand_millisec = 200 + (rand() % 99);
+	int rand_millisec = min + (rand() % 99);
 	return rand_millisec;
 
 	}
@@ -625,8 +646,8 @@ void Mutex_CountUpTask(void *argument)
 	else
 		mutex_protected_count=0;
 	// Done writing, so give back the mutex
-	  osMutexRelease(UpDownMutexHandle);
-    osDelay(random_wait());
+	osMutexRelease(UpDownMutexHandle);
+    osDelay(random_wait(300));
   }
   /* USER CODE END Mutex_CountUpTask */
 }
@@ -644,11 +665,67 @@ void Mutex_CountDownTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osMutexWait(UpDownMutexHandle,100000);
-
-    osDelay(1);
+	  osMutexWait(UpDownMutexHandle,100000);
+	  if (mutex_protected_count<1)
+	  		mutex_protected_count=99;
+	  	else
+	  		mutex_protected_count--;
+	  	// Done writing, so give back the mutex
+		osMutexRelease(UpDownMutexHandle);
+		osDelay(random_wait(200));
   }
   /* USER CODE END Mutex_CountDownTask */
+}
+
+/* USER CODE BEGIN Header_UpdateGlobDisplayProcess */
+/**
+* @brief Function implementing the UpdateGlobDisp thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_UpdateGlobDisplayProcess */
+void UpdateGlobDisplayProcess(void *argument)
+{
+  /* USER CODE BEGIN UpdateGlobDisplayProcess */
+  /* Infinite loop
+   * This just puts the value of the GlobalVariable on the
+   * right-most two-digits of the 7Seg Display */
+
+  for(;;)
+	  {
+	  MultiFunctionShield_Display_Two_Digits(mutex_protected_count);
+	  osDelay(150);	// The competing process to inc/dec are 200 - 300mS
+					// So show this a bit faster
+	  }
+  /* USER CODE END UpdateGlobDisplayProcess */
+}
+
+/* USER CODE BEGIN Header_ResetGlobalTask */
+/**
+* @brief Function implementing the ResetGlobal thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_ResetGlobalTask */
+void ResetGlobalTask(void *argument)
+{
+  /* USER CODE BEGIN ResetGlobalTask */
+  /* Infinite loop */
+  for(;;)
+		{
+		/* Pressing Button 3 sets us to ask for
+		 * the MUTEX protecting the global variable
+		 * When we get it, we can reset the global to the middle
+		 */
+		osSemaphoreAcquire(Button_3_SemaphoreHandle,100000);
+		// Now we have the semaphore because the button was pressed
+		osMutexWait(UpDownMutexHandle,100000);
+		mutex_protected_count = Protected_Count_Initial_Value ;
+		osDelay(5000);	// Wait for 5 seconds before making the resource available again
+		osMutexRelease(UpDownMutexHandle);
+		osDelay(1);
+		 }
+		  /* USER CODE END ResetGlobalTask */
 }
 
 /* SW_Timer_Countdown function */
