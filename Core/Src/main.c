@@ -514,11 +514,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case Button_2_Pin:
 			osSemaphoreRelease(Button_2_SemaphoreHandle);
 
-			xTaskNotifyFromISR( TaskHandle_t xTaskToNotify,
-			                                uint32_t ulValue,
-			                                eNotifyAction eAction,
-			                                BaseType_t *pxHigherPriorityTaskWoken );
-
+			xTaskNotifyFromISR(NotifToggleHandle, 0, eNoAction, pdTRUE);
 			break;
 
 		case Button_3_Pin:
@@ -598,10 +594,12 @@ void NotifyToggleTask(void *argument)
 {
   /* USER CODE BEGIN NotifyToggleTask */
   /* Infinite loop */
+ unsigned int p = 0;
   for(;;)
   {
+	xTaskNotifyWait( 0,  0, (int *)p, 100000);
 	HAL_GPIO_TogglePin(LED_D2_GPIO_Port , LED_D2_Pin);
-    osDelay(1);
+    osDelay(20);
   }
   /* USER CODE END NotifyToggleTask */
 }
