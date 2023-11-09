@@ -2,6 +2,7 @@
 
 void MultiFunctionShield_WriteNumberToSegment(uint8_t digit);
 void MultiFunctionShield_Single_Digit_Display (int digit, int8_t value);
+void MultiFunctionShield_Display_Two_Digits (int8_t value);
 void MultiFunctionShield_Display (int16_t value);
 void MultiFunctionShield__ISRFunc(void);
 void MultiFunctionShield_Clear(void);

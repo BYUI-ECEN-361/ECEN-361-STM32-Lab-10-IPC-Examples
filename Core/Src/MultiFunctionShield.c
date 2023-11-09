@@ -94,6 +94,22 @@ void MultiFunctionShield_Single_Digit_Display (int digit, int8_t value)
 	}
 
 
+void MultiFunctionShield_Display_Two_Digits (int8_t value)
+// Just change the right-most 2 display digits.  Must be 0<= x <=99
+	{
+	if (value <0) {	//Display negative
+			SEGMENT_VALUE[2] = SEGMENT_MINUS;
+			SEGMENT_VALUE[3] = SEGMENT_MINUS;
+		}
+	else
+		{
+		value = value % 99; // Just in case it's bigger
+		MultiFunctionShield_Single_Digit_Display(2, (value / 10));
+		MultiFunctionShield_Single_Digit_Display(1, (value % 10));
+		}
+	}
+
+
 
 void set_Decimal_Point (int position)
 	{

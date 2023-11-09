@@ -21,7 +21,9 @@
 /* USER CODE BEGIN Includes */
 #include "MultiFunctionShield.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,7 +113,15 @@ const osSemaphoreAttr_t Semaphore_Counting_attributes = {
 };
 /* USER CODE BEGIN PV */
 
-int countdown_display = 99;
+uint8_t countdown_display = 9;
+
+/*
+ * This is a global variable with multiple writers
+ * But should not change, because all writers must have the mutex
+ *
+ */
+uint8_t mutex_protected_count = 0;
+
 
 /* USER CODE END PV */
 
@@ -173,6 +183,8 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim17);							// LED SevenSeg cycle thru them
 
 	Clear_LEDs();
+	MultiFunctionShield_Display_Two_Digits(56);
+
 
   /* USER CODE END 2 */
 
@@ -483,6 +495,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			break;
 
 		case Button_3_Pin:
+			srand((unsigned) uwTick );
 			osSemaphoreRelease(Button_3_SemaphoreHandle);
 			break;
 		}
@@ -506,6 +519,17 @@ PUTCHAR_PROTOTYPE
   return ch;
 }
 
+
+int random_wait()
+	{
+	/* Return a random number between 200 - 300
+	 * Meant to be mS for the count up or count down in the protected
+	 * mutex demonstration routines
+	 */
+	int rand_millisec = 200 + (rand() % 99);
+	return rand_millisec;
+
+	}
 
 
 
@@ -593,9 +617,16 @@ void Mutex_CountUpTask(void *argument)
   for(;;)
   {
 	  osMutexWait(UpDownMutexHandle,100000);
-	  // Once we have it, we can start counting down
+	  // Once we have it, we can start counting Up
+	  // THe count up will be some random between 200 - 300 mS
 
-    osDelay(1);
+	if (mutex_protected_count<99)
+		mutex_protected_count++;
+	else
+		mutex_protected_count=0;
+	// Done writing, so give back the mutex
+	  osMutexRelease(UpDownMutexHandle);
+    osDelay(random_wait());
   }
   /* USER CODE END Mutex_CountUpTask */
 }
@@ -613,6 +644,8 @@ void Mutex_CountDownTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	osMutexWait(UpDownMutexHandle,100000);
+
     osDelay(1);
   }
   /* USER CODE END Mutex_CountDownTask */
