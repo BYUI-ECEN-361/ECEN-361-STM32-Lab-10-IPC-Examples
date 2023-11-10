@@ -1868,8 +1868,8 @@ void NotifyToggleTask(void *argument)
  8000e68:	2140      	movs	r1, #64	; 0x40
  8000e6a:	f04f 4090 	mov.w	r0, #1207959552	; 0x48000000
  8000e6e:	f000 fe49 	bl	8001b04 <HAL_GPIO_TogglePin>
-    osDelay(1);
- 8000e72:	2001      	movs	r0, #1
+    osDelay(20);
+ 8000e72:	2014      	movs	r0, #20
  8000e74:	f003 fb3a 	bl	80044ec <osDelay>
 	xTaskNotifyWait( 0,  0, (int *)p, 100000);
  8000e78:	e7f0      	b.n	8000e5c <NotifyToggleTask+0xc>
