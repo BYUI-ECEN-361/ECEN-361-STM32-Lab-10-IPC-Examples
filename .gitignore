@@ -2,5 +2,4 @@
 Debug/Core/Src/main.o
 Debug/Core/Src/main.o
 *.o
-*.elf
 *.list
