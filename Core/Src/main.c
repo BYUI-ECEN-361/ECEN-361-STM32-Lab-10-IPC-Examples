@@ -53,10 +53,10 @@ const osThreadAttr_t SemaphoreToggle_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for NotifToggle */
-osThreadId_t NotifToggleHandle;
-const osThreadAttr_t NotifToggle_attributes = {
-  .name = "NotifToggle",
+/* Definitions for NotifyToggle */
+osThreadId_t NotifyToggleHandle;
+const osThreadAttr_t NotifyToggle_attributes = {
+  .name = "NotifyToggle",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -215,13 +215,13 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of Button_1_Semaphore */
-  Button_1_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_attributes);
+  Button_1_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_1_Semaphore_attributes);
 
   /* creation of Button_2_Semaphore */
-  Button_2_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_2_Semaphore_attributes);
+  Button_2_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_2_Semaphore_attributes);
 
   /* creation of Button_3_Semaphore */
-  Button_3_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_3_Semaphore_attributes);
+  Button_3_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_3_Semaphore_attributes);
 
   /* creation of Semaphore_Counting */
   Semaphore_CountingHandle = osSemaphoreNew(31, 31, &Semaphore_Counting_attributes);
@@ -246,8 +246,8 @@ int main(void)
   /* creation of SemaphoreToggle */
   SemaphoreToggleHandle = osThreadNew(Semaphore_Toggle_Task, NULL, &SemaphoreToggle_attributes);
 
-  /* creation of NotifToggle */
-  NotifToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifToggle_attributes);
+  /* creation of NotifyToggle */
+  NotifyToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifyToggle_attributes);
 
   /* creation of SW_Timer_Toggle */
   SW_Timer_ToggleHandle = osThreadNew(SW_Timer_Task, NULL, &SW_Timer_Toggle_attributes);
@@ -513,8 +513,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 		case Button_2_Pin:
 			osSemaphoreRelease(Button_2_SemaphoreHandle);
-
-			xTaskNotifyFromISR(NotifToggleHandle, 0, eNoAction, pdTRUE);
+			xTaskNotifyFromISR(NotifyToggleHandle, 0, eNoAction, pdTRUE);
 			break;
 
 		case Button_3_Pin:
@@ -730,7 +729,7 @@ void ResetGlobalTask(void *argument)
 		osMutexRelease(UpDownMutexHandle);
 		osDelay(1);
 		 }
-		  /* USER CODE END ResetGlobalTask */
+  /* USER CODE END ResetGlobalTask */
 }
 
 /* SW_Timer_Countdown function */
