@@ -64,7 +64,9 @@ Any process that is waiting for a button can simply hold on the semaphore of int
 	  }
 ```
 
-This is a good example of a binary semaphore -- a flag used to control access to a shared resource.   Binary semaphores have two operations, namely wait (P) and signal (V) operations.  In CMSIS language, this is "Acquire" and "Release" respectively. 
+This is a good example of a binary semaphore -- a flag used to control access to a shared resource.   Binary semaphores have two operations, namely wait (P) and signal (V) operations.  In CMSIS language, this is "Acquire" and "Release" respectively.  See the routine calls above.
+
+
 
 
 ## Part 1: Create Tasks
@@ -74,6 +76,11 @@ Using standard FreeRTOS (CMSIS) calls, create four tasks as follows:
 
 
 
+* **START button (S1):** Initiates a random wait. After the random wait, all the SevenSeg lights go on. As soon as the lights go on, a timer starts counting milliseconds
+
+* **STOP button (S2):** Stops the millisecond reaction timer and shows it on the display
+
+* **FASTEST button (S3):** Extra Credit – This button shows the fastest speed.
 
 
 ### Add 2 more timer interrupts that blink LEDs
@@ -81,48 +88,12 @@ Using standard FreeRTOS (CMSIS) calls, create four tasks as follows:
 
 ## Part 1 Questions (2 pts)
 
-Note the speed of D1/D2/D3 – they should seem like a 3-bit binary counter.
-
-Once you have all three LEDs blinking properly, answer the following questions:
-
-1. How fast does D1 turn on/off? [*answer here*]
-
-2. Do all LEDs toggle at *exactly* the same time? [*answer here*]
-
 ## Part 2: Changing the clock tree
-
-Change the clock tree to adjust the rates at which the LEDs blink.
-
-1. Open the ioc Configuration GUI
-2. Change the APB1 and ABP2-Prescalers to “/8” (Changing both of them guarantees that whatever timer you chose will be affected.)
-
-![A computer screen shot of a diagram Description automatically generated](media/a1a4a08f8ac2f1b714fa0a5456b5e07e.png)
-
-3. Compile and re-run and observe the behavior of the LEDs
 
 ## Part 2 Questions (3 pts)
 
-1. What has happened to the speed of the timers? [*answer here*]
-
-2. What is the new frequency of LED D1? [*answer here*]
-
-3. When we changed the frequency, did the Seven-Segment Light update rate change?  (hint, look at the clocks driving the APB1, APB2 buses and which timers are on which bus.  Recall that the Seven-Segment timer is Tim17) [*answer here*]
-
 ## Part 3: Reaction Timer (5 pts)
 
-In addition to performing useful tasks at set intervals, timers can also be used to measure elapsed time of an event. The events can be triggered by software, or by a hardware input.
-
-For this part of the lab, we’ll make a small “reaction timer” that measures how fast your hand/eye coordination can be, in milliseconds.
-
-We’ll define the buttons and display as shown:
-
-![](media/2b43c113169efb48ce00225bd55358ff.png)
-
-* **START button (S1):** Initiates a random wait. After the random wait, all the SevenSeg lights go on. As soon as the lights go on, a timer starts counting milliseconds
-
-* **STOP button (S2):** Stops the millisecond reaction timer and shows it on the display
-
-* **FASTEST button (S3):** Extra Credit – This button shows the fastest speed.
 
 Code for this part is organized in the **ReactionTester.c** source file and **main.c**. Fill in between the comments:
 

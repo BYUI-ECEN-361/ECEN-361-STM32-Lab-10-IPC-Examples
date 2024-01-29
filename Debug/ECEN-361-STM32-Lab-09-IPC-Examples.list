@@ -7,23 +7,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         0000925c  08000190  08000190  00010190  2**4
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       000003ac  080093ec  080093ec  000193ec  2**2
+  2 .rodata       000003b0  080093ec  080093ec  000193ec  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08009798  08009798  00020070  2**0
+  3 .ARM.extab    00000000  0800979c  0800979c  00020070  2**0
                   CONTENTS
-  4 .ARM          00000008  08009798  08009798  00019798  2**2
+  4 .ARM          00000008  0800979c  0800979c  0001979c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  080097a0  080097a0  00020070  2**0
+  5 .preinit_array 00000000  080097a4  080097a4  00020070  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  080097a0  080097a0  000197a0  2**2
+  6 .init_array   00000004  080097a4  080097a4  000197a4  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  080097a4  080097a4  000197a4  2**2
+  7 .fini_array   00000004  080097a8  080097a8  000197a8  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         00000070  20000000  080097a8  00020000  2**2
+  8 .data         00000070  20000000  080097ac  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00004b4c  20000070  08009818  00020070  2**2
+  9 .bss          00004b4c  20000070  0800981c  00020070  2**2
                   ALLOC
- 10 ._user_heap_stack 00000604  20004bbc  08009818  00024bbc  2**0
+ 10 ._user_heap_stack 00000604  20004bbc  0800981c  00024bbc  2**0
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020070  2**0
                   CONTENTS, READONLY
@@ -41,11 +41,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_line   0001ae34  00000000  00000000  0006c34e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000ffab9  00000000  00000000  00087182  2**0
+ 19 .debug_str    000ffabb  00000000  00000000  00087182  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00006ed4  00000000  00000000  00186c3c  2**2
+ 20 .debug_frame  00006ed4  00000000  00000000  00186c40  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000084  00000000  00000000  0018db10  2**0
+ 21 .debug_line_str 00000084  00000000  00000000  0018db14  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -602,7 +602,7 @@ void MultiFunctionShield_Single_Digit_Display (int digit, int8_t value)
  80006aa:	bf00      	nop
  80006ac:	20000090 	.word	0x20000090
  80006b0:	66666667 	.word	0x66666667
- 80006b4:	08009504 	.word	0x08009504
+ 80006b4:	08009508 	.word	0x08009508
 
 080006b8 <MultiFunctionShield_Display_Two_Digits>:
 
@@ -819,7 +819,7 @@ void MultiFunctionShield_WriteNumberToSegment(uint8_t digit)
  800081a:	bd80      	pop	{r7, pc}
  800081c:	48000400 	.word	0x48000400
  8000820:	20000090 	.word	0x20000090
- 8000824:	08009510 	.word	0x08009510
+ 8000824:	08009514 	.word	0x08009514
 
 08000828 <MultiFunctionShield__ISRFunc>:
 	}
@@ -945,9 +945,9 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of Button_1_Semaphore */
-  Button_1_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_1_Semaphore_attributes);
+  Button_1_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_1_Semaphore_attributes);
  80008ce:	4a37      	ldr	r2, [pc, #220]	; (80009ac <main+0x120>)
- 80008d0:	2101      	movs	r1, #1
+ 80008d0:	2100      	movs	r1, #0
  80008d2:	2001      	movs	r0, #1
  80008d4:	f004 f845 	bl	8004962 <osSemaphoreNew>
  80008d8:	4603      	mov	r3, r0
@@ -955,9 +955,9 @@ int main(void)
  80008dc:	6013      	str	r3, [r2, #0]
 
   /* creation of Button_2_Semaphore */
-  Button_2_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_2_Semaphore_attributes);
+  Button_2_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_2_Semaphore_attributes);
  80008de:	4a35      	ldr	r2, [pc, #212]	; (80009b4 <main+0x128>)
- 80008e0:	2101      	movs	r1, #1
+ 80008e0:	2100      	movs	r1, #0
  80008e2:	2001      	movs	r0, #1
  80008e4:	f004 f83d 	bl	8004962 <osSemaphoreNew>
  80008e8:	4603      	mov	r3, r0
@@ -965,9 +965,9 @@ int main(void)
  80008ec:	6013      	str	r3, [r2, #0]
 
   /* creation of Button_3_Semaphore */
-  Button_3_SemaphoreHandle = osSemaphoreNew(1, 1, &Button_3_Semaphore_attributes);
+  Button_3_SemaphoreHandle = osSemaphoreNew(1, 0, &Button_3_Semaphore_attributes);
  80008ee:	4a33      	ldr	r2, [pc, #204]	; (80009bc <main+0x130>)
- 80008f0:	2101      	movs	r1, #1
+ 80008f0:	2100      	movs	r1, #0
  80008f2:	2001      	movs	r0, #1
  80008f4:	f004 f835 	bl	8004962 <osSemaphoreNew>
  80008f8:	4603      	mov	r3, r0
@@ -1011,8 +1011,8 @@ int main(void)
  800092c:	4a2c      	ldr	r2, [pc, #176]	; (80009e0 <main+0x154>)
  800092e:	6013      	str	r3, [r2, #0]
 
-  /* creation of NotifToggle */
-  NotifToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifToggle_attributes);
+  /* creation of NotifyToggle */
+  NotifyToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifyToggle_attributes);
  8000930:	4a2c      	ldr	r2, [pc, #176]	; (80009e4 <main+0x158>)
  8000932:	2100      	movs	r1, #0
  8000934:	482c      	ldr	r0, [pc, #176]	; (80009e8 <main+0x15c>)
@@ -1084,41 +1084,41 @@ int main(void)
   while (1)
  8000994:	e7fe      	b.n	8000994 <main+0x108>
  8000996:	bf00      	nop
- 8000998:	080094c0 	.word	0x080094c0
- 800099c:	080094c4 	.word	0x080094c4
+ 8000998:	080094c4 	.word	0x080094c4
+ 800099c:	080094c8 	.word	0x080094c8
  80009a0:	20000094 	.word	0x20000094
- 80009a4:	08009620 	.word	0x08009620
+ 80009a4:	08009624 	.word	0x08009624
  80009a8:	20000188 	.word	0x20000188
- 80009ac:	08009630 	.word	0x08009630
+ 80009ac:	08009634 	.word	0x08009634
  80009b0:	2000018c 	.word	0x2000018c
- 80009b4:	08009640 	.word	0x08009640
+ 80009b4:	08009644 	.word	0x08009644
  80009b8:	20000190 	.word	0x20000190
- 80009bc:	08009650 	.word	0x08009650
+ 80009bc:	08009654 	.word	0x08009654
  80009c0:	20000194 	.word	0x20000194
- 80009c4:	08009660 	.word	0x08009660
+ 80009c4:	08009664 	.word	0x08009664
  80009c8:	20000198 	.word	0x20000198
- 80009cc:	08009610 	.word	0x08009610
+ 80009cc:	08009614 	.word	0x08009614
  80009d0:	08000ff1 	.word	0x08000ff1
  80009d4:	20000184 	.word	0x20000184
- 80009d8:	08009514 	.word	0x08009514
+ 80009d8:	08009518 	.word	0x08009518
  80009dc:	08000e21 	.word	0x08000e21
  80009e0:	20000168 	.word	0x20000168
- 80009e4:	08009538 	.word	0x08009538
+ 80009e4:	0800953c 	.word	0x0800953c
  80009e8:	08000e51 	.word	0x08000e51
  80009ec:	2000016c 	.word	0x2000016c
- 80009f0:	0800955c 	.word	0x0800955c
+ 80009f0:	08009560 	.word	0x08009560
  80009f4:	08000e81 	.word	0x08000e81
  80009f8:	20000170 	.word	0x20000170
- 80009fc:	08009580 	.word	0x08009580
+ 80009fc:	08009584 	.word	0x08009584
  8000a00:	08000ed1 	.word	0x08000ed1
  8000a04:	20000174 	.word	0x20000174
- 8000a08:	080095a4 	.word	0x080095a4
+ 8000a08:	080095a8 	.word	0x080095a8
  8000a0c:	08000f29 	.word	0x08000f29
  8000a10:	20000178 	.word	0x20000178
- 8000a14:	080095c8 	.word	0x080095c8
+ 8000a14:	080095cc 	.word	0x080095cc
  8000a18:	08000f81 	.word	0x08000f81
  8000a1c:	2000017c 	.word	0x2000017c
- 8000a20:	080095ec 	.word	0x080095ec
+ 8000a20:	080095f0 	.word	0x080095f0
  8000a24:	08000fa1 	.word	0x08000fa1
  8000a28:	20000180 	.word	0x20000180
 
@@ -1696,8 +1696,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
  8000d72:	681b      	ldr	r3, [r3, #0]
  8000d74:	4618      	mov	r0, r3
  8000d76:	f003 fecf 	bl	8004b18 <osSemaphoreRelease>
-
-			xTaskNotifyFromISR(NotifToggleHandle, 0, eNoAction, pdTRUE);
+			xTaskNotifyFromISR(NotifyToggleHandle, 0, eNoAction, pdTRUE);
  8000d7a:	4b0e      	ldr	r3, [pc, #56]	; (8000db4 <HAL_GPIO_EXTI_Callback+0x6c>)
  8000d7c:	6818      	ldr	r0, [r3, #0]
  8000d7e:	2301      	movs	r3, #1
@@ -2128,7 +2127,7 @@ void ResetGlobalTask(void *argument)
  8000fec:	20000001 	.word	0x20000001
 
 08000ff0 <SW_Timer_Countdown>:
-		  /* USER CODE END ResetGlobalTask */
+  /* USER CODE END ResetGlobalTask */
 }
 
 /* SW_Timer_Countdown function */
@@ -3283,7 +3282,7 @@ LoopForever:
   ldr r1, =_edata
  8001528:	20000070 	.word	0x20000070
   ldr r2, =_sidata
- 800152c:	080097a8 	.word	0x080097a8
+ 800152c:	080097ac 	.word	0x080097ac
   ldr r2, =_sbss
  8001530:	20000070 	.word	0x20000070
   ldr r4, =_ebss
@@ -4924,7 +4923,7 @@ HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruct)
  8001e9c:	e014      	b.n	8001ec8 <HAL_RCC_OscConfig+0x298>
  8001e9e:	bf00      	nop
  8001ea0:	40021000 	.word	0x40021000
- 8001ea4:	08009670 	.word	0x08009670
+ 8001ea4:	08009674 	.word	0x08009674
  8001ea8:	20000004 	.word	0x20000004
  8001eac:	20000008 	.word	0x20000008
  8001eb0:	4ba0      	ldr	r3, [pc, #640]	; (8002134 <HAL_RCC_OscConfig+0x504>)
@@ -6229,7 +6228,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  80025d2:	bd80      	pop	{r7, pc}
  80025d4:	40022000 	.word	0x40022000
  80025d8:	40021000 	.word	0x40021000
- 80025dc:	08009670 	.word	0x08009670
+ 80025dc:	08009674 	.word	0x08009674
  80025e0:	20000004 	.word	0x20000004
  80025e4:	20000008 	.word	0x20000008
 
@@ -6434,7 +6433,7 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  80026ec:	4770      	bx	lr
  80026ee:	bf00      	nop
  80026f0:	40021000 	.word	0x40021000
- 80026f4:	08009688 	.word	0x08009688
+ 80026f4:	0800968c 	.word	0x0800968c
  80026f8:	00f42400 	.word	0x00f42400
  80026fc:	007a1200 	.word	0x007a1200
 
@@ -6483,7 +6482,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  8002738:	4618      	mov	r0, r3
  800273a:	bd80      	pop	{r7, pc}
  800273c:	40021000 	.word	0x40021000
- 8002740:	08009680 	.word	0x08009680
+ 8002740:	08009684 	.word	0x08009684
 
 08002744 <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -6510,7 +6509,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  8002764:	4618      	mov	r0, r3
  8002766:	bd80      	pop	{r7, pc}
  8002768:	40021000 	.word	0x40021000
- 800276c:	08009680 	.word	0x08009680
+ 800276c:	08009684 	.word	0x08009684
 
 08002770 <HAL_RCC_GetClockConfig>:
   *         will be configured.
@@ -17764,7 +17763,7 @@ BaseType_t xReturn;
  800638a:	46bd      	mov	sp, r7
  800638c:	bd80      	pop	{r7, pc}
  800638e:	bf00      	nop
- 8006390:	080094ec 	.word	0x080094ec
+ 8006390:	080094f0 	.word	0x080094f0
  8006394:	080069d5 	.word	0x080069d5
  8006398:	20000e7c 	.word	0x20000e7c
  800639c:	20000984 	.word	0x20000984
@@ -20544,7 +20543,7 @@ BaseType_t xReturn = pdFAIL;
  8007268:	46bd      	mov	sp, r7
  800726a:	bd80      	pop	{r7, pc}
  800726c:	20000eb4 	.word	0x20000eb4
- 8007270:	080094f4 	.word	0x080094f4
+ 8007270:	080094f8 	.word	0x080094f8
  8007274:	080074e5 	.word	0x080074e5
  8007278:	20000eb8 	.word	0x20000eb8
 
@@ -21869,7 +21868,7 @@ static void prvCheckForValidListAndQueue( void )
  80079ac:	20000eb0 	.word	0x20000eb0
  80079b0:	20000f60 	.word	0x20000f60
  80079b4:	20000ec0 	.word	0x20000ec0
- 80079b8:	080094fc 	.word	0x080094fc
+ 80079b8:	08009500 	.word	0x08009500
 
 080079bc <xTimerIsTimerActive>:
 /*-----------------------------------------------------------*/
@@ -23521,8 +23520,8 @@ uint8_t *puc;
  80082fc:	615a      	str	r2, [r3, #20]
  80082fe:	bd38      	pop	{r3, r4, r5, pc}
  8008300:	2000006c 	.word	0x2000006c
- 8008304:	080096b8 	.word	0x080096b8
- 8008308:	080096cf 	.word	0x080096cf
+ 8008304:	080096bc 	.word	0x080096bc
+ 8008308:	080096d3 	.word	0x080096d3
  800830c:	abcd330e 	.word	0xabcd330e
  8008310:	e66d1234 	.word	0xe66d1234
  8008314:	0005deec 	.word	0x0005deec
@@ -23566,8 +23565,8 @@ uint8_t *puc;
  800836e:	f020 4000 	bic.w	r0, r0, #2147483648	; 0x80000000
  8008372:	bd10      	pop	{r4, pc}
  8008374:	2000006c 	.word	0x2000006c
- 8008378:	080096b8 	.word	0x080096b8
- 800837c:	080096cf 	.word	0x080096cf
+ 8008378:	080096bc 	.word	0x080096bc
+ 800837c:	080096d3 	.word	0x080096d3
  8008380:	abcd330e 	.word	0xabcd330e
  8008384:	e66d1234 	.word	0xe66d1234
  8008388:	0005deec 	.word	0x0005deec
@@ -24000,10 +23999,10 @@ uint8_t *puc;
  800874a:	4798      	blx	r3
  800874c:	3601      	adds	r6, #1
  800874e:	e7f2      	b.n	8008736 <__libc_init_array+0x1e>
- 8008750:	080097a0 	.word	0x080097a0
- 8008754:	080097a0 	.word	0x080097a0
- 8008758:	080097a0 	.word	0x080097a0
- 800875c:	080097a4 	.word	0x080097a4
+ 8008750:	080097a4 	.word	0x080097a4
+ 8008754:	080097a4 	.word	0x080097a4
+ 8008758:	080097a4 	.word	0x080097a4
+ 800875c:	080097a8 	.word	0x080097a8
 
 08008760 <__retarget_lock_init_recursive>:
  8008760:	4770      	bx	lr
@@ -24049,9 +24048,9 @@ uint8_t *puc;
  80087ac:	e7f3      	b.n	8008796 <__assert_func+0x12>
  80087ae:	bf00      	nop
  80087b0:	2000006c 	.word	0x2000006c
- 80087b4:	08009727 	.word	0x08009727
- 80087b8:	08009734 	.word	0x08009734
- 80087bc:	08009762 	.word	0x08009762
+ 80087b4:	0800972b 	.word	0x0800972b
+ 80087b8:	08009738 	.word	0x08009738
+ 80087bc:	08009766 	.word	0x08009766
 
 080087c0 <_free_r>:
  80087c0:	b537      	push	{r0, r1, r2, r4, r5, lr}
@@ -24550,11 +24549,11 @@ uint8_t *puc;
  8008c2c:	4630      	mov	r0, r6
  8008c2e:	f000 f879 	bl	8008d24 <_printf_i>
  8008c32:	e7e4      	b.n	8008bfe <_vfiprintf_r+0x1ea>
- 8008c34:	08009763 	.word	0x08009763
- 8008c38:	0800976d 	.word	0x0800976d
+ 8008c34:	08009767 	.word	0x08009767
+ 8008c38:	08009771 	.word	0x08009771
  8008c3c:	00000000 	.word	0x00000000
  8008c40:	080089ef 	.word	0x080089ef
- 8008c44:	08009769 	.word	0x08009769
+ 8008c44:	0800976d 	.word	0x0800976d
 
 08008c48 <_printf_common>:
  8008c48:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
@@ -24887,8 +24886,8 @@ uint8_t *puc;
  8008f58:	f104 0619 	add.w	r6, r4, #25
  8008f5c:	e7f5      	b.n	8008f4a <_printf_i+0x226>
  8008f5e:	bf00      	nop
- 8008f60:	08009774 	.word	0x08009774
- 8008f64:	08009785 	.word	0x08009785
+ 8008f60:	08009778 	.word	0x08009778
+ 8008f64:	08009789 	.word	0x08009789
 
 08008f68 <__sflush_r>:
  8008f68:	898a      	ldrh	r2, [r1, #12]
