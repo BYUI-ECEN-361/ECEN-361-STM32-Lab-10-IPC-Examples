@@ -33,12 +33,16 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define B1  1
+#define B2  2
+#define B3  4
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -95,6 +99,13 @@ const osThreadAttr_t ResetGlobal_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for DebounceTask */
+osThreadId_t DebounceTaskHandle;
+const osThreadAttr_t DebounceTask_attributes = {
+  .name = "DebounceTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for SW_Timer_7Seg */
 osTimerId_t SW_Timer_7SegHandle;
 const osTimerAttr_t SW_Timer_7Seg_attributes = {
@@ -126,6 +137,7 @@ const osSemaphoreAttr_t Semaphore_Counting_attributes = {
   .name = "Semaphore_Counting"
 };
 /* USER CODE BEGIN PV */
+osSemaphoreId_t SwitchToDebounce;  // Type has to be in here because the GUI auto
 
 uint8_t countdown_display = 9;
 
@@ -152,6 +164,7 @@ void Mutex_CountUpTask(void *argument);
 void Mutex_CountDownTask(void *argument);
 void UpdateGlobDisplayProcess(void *argument);
 void ResetGlobalTask(void *argument);
+void StartDebounce(void *argument);
 void SW_Timer_Countdown(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -263,6 +276,9 @@ int main(void)
 
   /* creation of ResetGlobal */
   ResetGlobalHandle = osThreadNew(ResetGlobalTask, NULL, &ResetGlobal_attributes);
+
+  /* creation of DebounceTask */
+  DebounceTaskHandle = osThreadNew(StartDebounce, NULL, &DebounceTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -425,7 +441,10 @@ static void MX_GPIO_Init(void)
                           |SevenSeg_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SevenSeg_LATCH_Pin|LED_D4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SevenSeg_LATCH_GPIO_Port, SevenSeg_LATCH_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_D4_GPIO_Port, LED_D4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -481,7 +500,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : LED_D4_Pin */
   GPIO_InitStruct.Pin = LED_D4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_D4_GPIO_Port, &GPIO_InitStruct);
 
@@ -503,22 +522,28 @@ static void MX_GPIO_Init(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	{
+	//BaseType_t pxH ;
+	uint32_t pxH = 0 ;
 	// All three buttons generate GPIO  interrupts
 	switch(GPIO_Pin)
 		{
 		case Button_1_Pin:
-			// Got the pin -- Give the semaphore
-			osSemaphoreRelease(Button_1_SemaphoreHandle);
-			break;
+			pxH = 1;
+			xTaskNotifyFromISR(DebounceTaskHandle, B1, eSetBits, (BaseType_t*) pxH );
+			break  ;
 
 		case Button_2_Pin:
-			osSemaphoreRelease(Button_2_SemaphoreHandle);
-			xTaskNotifyFromISR(NotifyToggleHandle, 0, eNoAction, pdTRUE);
+			// osSemaphoreRelease(Button_2_SemaphoreHandle);
+			pxH = 2;
+			xTaskNotifyFromISR(DebounceTaskHandle, B2, eSetBits, (BaseType_t*) pxH );
+			// xTaskNotifyFromISR(NotifyToggleHandle, 0, eNoAction, (BaseType_t*) pxH);
 			break;
 
 		case Button_3_Pin:
-			srand((unsigned) uwTick );
-			osSemaphoreRelease(Button_3_SemaphoreHandle);
+			pxH = 3;
+			xTaskNotifyFromISR(DebounceTaskHandle, B3, eSetBits, (BaseType_t*) pxH );
+			// srand((unsigned) uwTick );
+			// osSemaphoreRelease(Button_3_SemaphoreHandle);
 			break;
 		}
 
@@ -552,7 +577,6 @@ int random_wait(int min)
 	return rand_millisec;
 
 	}
-
 
 
 /* USER CODE END 4 */
@@ -593,10 +617,11 @@ void NotifyToggleTask(void *argument)
 {
   /* USER CODE BEGIN NotifyToggleTask */
   /* Infinite loop */
- unsigned int p = 0;
+ // unsigned int *p = 0;
+ uint32_t *p = 0 ;
   for(;;)
   {
-	xTaskNotifyWait( 0,  0, (int *)p, 100000);
+	xTaskNotifyWait( 0,  0, p, 100000);
 	HAL_GPIO_TogglePin(LED_D2_GPIO_Port , LED_D2_Pin);
     osDelay(20);
   }
@@ -730,6 +755,38 @@ void ResetGlobalTask(void *argument)
 		osDelay(1);
 		 }
   /* USER CODE END ResetGlobalTask */
+}
+
+/* USER CODE BEGIN Header_StartDebounce */
+/**
+* @brief Function implementing the DebounceTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDebounce */
+void StartDebounce(void *argument)
+{
+  /* USER CODE BEGIN StartDebounce */
+	uint32_t buttons_in;  // placeholder
+  /* Infinite loop */
+  for(;;)
+  {
+	  /* We wait here until there's a notification
+	   * that there's been a button and delay for debounce.
+	   * Could have done the semaphore release directly from the
+	   * ISR, BUT there wouldn't have been a debounce.  We want
+	   * the debounce done in a thread-safe way -- not holding up the ISR.
+	   * Arguments are:  bits_to_clear_entry, bits_to_clear_exit
+	   * So clear all but the top (0xfffffff8) going in, then the bottom 3 (0x7) going out
+	   *
+	   * */
+	xTaskNotifyWait( 0xfffffff8, 0x7, &buttons_in, portMAX_DELAY);
+    osDelay(30);
+    if (buttons_in & B1) { osSemaphoreRelease(Button_1_SemaphoreHandle); }
+    if (buttons_in & B2) { osSemaphoreRelease(Button_2_SemaphoreHandle); }
+    if (buttons_in & B3) { osSemaphoreRelease(Button_3_SemaphoreHandle); }
+    }
+  /* USER CODE END StartDebounce */
 }
 
 /* SW_Timer_Countdown function */

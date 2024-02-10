@@ -171,7 +171,6 @@
 		<project id="Week-09-IPC-Examples.null.140693913" name="Week-09-IPC-Examples"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1787028665;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.1787028665.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1346406862;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.206133004">
@@ -182,4 +181,7 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets/>
+	</storageModule>
 </cproject>
