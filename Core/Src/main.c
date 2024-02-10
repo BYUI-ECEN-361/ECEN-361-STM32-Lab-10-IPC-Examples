@@ -533,10 +533,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			break  ;
 
 		case Button_2_Pin:
-			// osSemaphoreRelease(Button_2_SemaphoreHandle);
 			pxH = 2;
 			xTaskNotifyFromISR(DebounceTaskHandle, B2, eSetBits, (BaseType_t*) pxH );
-			// xTaskNotifyFromISR(NotifyToggleHandle, 0, eNoAction, (BaseType_t*) pxH);
 			break;
 
 		case Button_3_Pin:
