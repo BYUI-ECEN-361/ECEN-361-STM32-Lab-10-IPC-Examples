@@ -1,4 +1,4 @@
-# ECEN-361 Lab-06:ADC, PWM, and DAC
+# ECEN-361 Lab-09: IPC-Examples
      Student Name:  ___________________________________
 
 ## Introduction and Objectives of the Lab
