@@ -22,7 +22,7 @@ In the provided FreeRTOS system, tasks are set up to use these
 mechanisms to communicate with each other. The mechanisms and associated
 tasks (and assignments) are described in the respective sections of the
 lab.
-
+___
 ## Part 1: RTOS-friendly debounced buttons -- Notifications and Semaphores
 
 As discussed in class, all mechanical buttons come with the mechanically
@@ -55,11 +55,61 @@ For a task(s) waiting for a clean, debounced button event, the initial
 button press can't trigger the task(s), it must first trigger the
 debounce wait, that then starts the task(s):
 
-![A screenshot of a computer Description automatically
-generated](media/image1.png){width="7.5in"
-height="3.0868055555555554in"}![](media/image2.png){width="4.572344706911636in"
-height="1.2498436132983377in"}
+<img src="media/safe_debounce1.png" alt="safe-debounce" width="100%"/>
 
+### Part 1 Instructions and Questions (2 pts)
+
+
+>**Create a Task**<br>
+(Either use the GUI -- *Under Middleware/FreeRTOS* or manually in the code) that will toggle LED_D4 each time Button_1 is pressed. <br>
+<br>
+<mark>1. How did your task ‘wait’ for the debounced button? <br>
+_______________________________________________________ </mark>
+<br> <br><br>
+<mark>2.)	How long is the time between the button interrupt coming in and it being enabled again? <br>
+_______________________________________________________ </mark>
+><br>
+<br>
+
+>**Modify Task to be Safe**<br>
+You’re given the framework of a second task (Semaphore_Toggle_D3) -- <p>
+>3. Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they both have been created with the same Priority..<br>
+<mark>
+[x] Yes, I modified and got it working and tested it by<br>
+>_________________________________________________________________________________<br><br>
+[ ] No, I didn't do this because  _______________________________________________________ </mark>
+><br>
+><br>
+
+ 
+4.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  
+
+[mark]    _______________________________________________________ [mark]
+
+
+5.)	Now change one of the priorities of these two tasks and re-run.  How has the behavior changed?
+
+    _______________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+___
 ## Part 2: Mutexes
 
 Mutex's are used in embedded systems to guarantee exclusive access to a
@@ -76,8 +126,7 @@ output to it.
 For this example, the following picture shows how a mutex could protect
 a value being display on the seven-segment:
 
-![A diagram of a computer Description automatically
-generated](media/image3.png){width="7.5in" height="4.088888888888889in"}
+<img src="media/mutex.png" alt="safe-debounce" width="100%"/>
 
 The three processes on the right are all competing for access to write
 to the protected variable. The **mutex_protected_count** is continuously
@@ -86,22 +135,9 @@ CountUp are both trying at random intervals, and the Reset_MutexCount
 waits for the Button_3 (via its associated semaphore), then resets the
 current count.
 
-![](media/image4.png){width="5.353497375328084in"
-height="1.416489501312336in"}
+<img src="media/def_sematoggle4.png" alt="safe-debounce" width="50%"/>
 
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
-
-## 
+### Part 2 Instructions and Questions (2 pt)
 
 ##  Part 3: Software Timers
 
