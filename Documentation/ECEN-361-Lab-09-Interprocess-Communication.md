@@ -1,6 +1,7 @@
-# NAME: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+# ECEN-361 Lab-06:ADC, PWM, and DAC
+     Student Name:  ___________________________________
 
-# Introduction and Objectives of the Lab
+## Introduction and Objectives of the Lab
 
 This lab shows how various independent tasks can communicate through the
 RTOS-controlled signaling mechanisms. It also shows the good practice of
@@ -70,7 +71,7 @@ _______________________________________________________ </mark>
 _______________________________________________________ </mark>
 ><br>
 <br>
-
+___
 >**Modify Task to be Safe**<br>
 You’re given the framework of a second task (Semaphore_Toggle_D3) -- <p>
 >3. Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they both have been created with the same Priority..<br>
@@ -80,11 +81,11 @@ You’re given the framework of a second task (Semaphore_Toggle_D3) -- <p>
 [ ] No, I didn't do this because  _______________________________________________________ </mark>
 ><br>
 ><br>
-
- 
+___
+><mark> <br>
 4.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  
 
-[mark]    _______________________________________________________ [mark]
+> _______________________________________________________ 
 
 
 5.)	Now change one of the priorities of these two tasks and re-run.  How has the behavior changed?
