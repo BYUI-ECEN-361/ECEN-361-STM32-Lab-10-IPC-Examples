@@ -56,9 +56,11 @@ For a task(s) waiting for a clean, debounced button event, the initial
 button press can't trigger the task(s), it must first trigger the
 debounce wait, that then starts the task(s):
 
-<img src="media/safe_debounce1.png" alt="safe-debounce" width="100%"/>
+<img src="media/safe_debounce1.png" alt="safe-debounce" width="85%" style="display: block; margin: 0 auto;" :w
+/>
 
-### Part 1 Instructions and Questions (2 pts)
+<!-------------------------------------------------------------------------------->
+### Part 1:  Instructions and Questions (2 pts)
 
 
 >**Create a Task**<br>
@@ -71,45 +73,29 @@ _______________________________________________________ </mark>
 _______________________________________________________ </mark>
 ><br>
 <br>
-___
 >**Modify Task to be Safe**<br>
 You’re given the framework of a second task (Semaphore_Toggle_D3) -- <p>
->3. Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they both have been created with the same Priority..<br>
-<mark>
-[x] Yes, I modified and got it working and tested it by<br>
->_________________________________________________________________________________<br><br>
-[ ] No, I didn't do this because  _______________________________________________________ </mark>
+>Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they both have been created with the same Priority..<br><br>
+><mark>3.)<br>
+>><mark>[x] Yes, I modified and got it working and tested it by<br>
+>>_________________________________________________________________________________<br><br>
+    [ ] No, I didn't do this because  _______________________________________________________ </mark>
 ><br>
 ><br>
-___
+>
 ><mark> <br>
-4.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  
+4.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  <br>
+>_________________________________________________________________________________<br><br>
+>
+><mark> 5.)	Now change one of the priorities of these two tasks, re-compile,  and re-run. <br>
+How has the behavior changed?
+>_________________________________________________________________________________<br><br>
 
-> _______________________________________________________ 
-
-
-5.)	Now change one of the priorities of these two tasks and re-run.  How has the behavior changed?
-
-    _______________________________________________________
-
-
+<mark>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!--------------------------------------------------------------------------------->
 ___
 ## Part 2: Mutexes
 
@@ -127,7 +113,7 @@ output to it.
 For this example, the following picture shows how a mutex could protect
 a value being display on the seven-segment:
 
-<img src="media/mutex.png" alt="safe-debounce" width="100%"/>
+<img src="media/mutex.png" alt="safe-debounce" width="85%" style="display: block; margin: 0 auto;" />
 
 The three processes on the right are all competing for access to write
 to the protected variable. The **mutex_protected_count** is continuously
@@ -136,10 +122,11 @@ CountUp are both trying at random intervals, and the Reset_MutexCount
 waits for the Button_3 (via its associated semaphore), then resets the
 current count.
 
-<img src="media/def_sematoggle4.png" alt="safe-debounce" width="50%"/>
+<img src="media/def_sematoggle4.png" alt="safe-debounce" width="50%" style="display: block; margin: 0 auto;" />
 
-### Part 2 Instructions and Questions (2 pt)
+### Part 2:  Instructions and Questions (2 pt)
 
+<!--------------------------------------------------------------------------------->
 ##  Part 3: Software Timers
 
 In a previous lab, we learned how to setup any of the hardware timer
@@ -156,4 +143,8 @@ Button_2 is used to toggle the SW_Timer_7Seg between running/stopped.
 When the timer expires, it calls a routine to decrement the left-most
 display digit.
 
+
+
+
+<!--------------------------------------------------------------------------------->
 ## EXTRA CREDIT Ideas
