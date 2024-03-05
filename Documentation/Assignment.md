@@ -1,4 +1,4 @@
-# ECEN-361 Lab-09: IPC-Examples
+# ECEN-361 Lab-10: IPC-Examples
      Student Name:  ___________________________________
 
 ## Introduction and Objectives of the Lab
