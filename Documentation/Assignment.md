@@ -66,7 +66,15 @@ debounce wait, that then starts the task(s):
 
 
 >**Create a Task**<br>
-(Either use the GUI -- *Under Middleware/FreeRTOS* or manually in the code) that will toggle LED_D4 each time Button_1 is pressed. <br>
+(Either use the GUI -- *Under Middleware/FreeRTOS* or manually in the code) that will toggle LED_D4 each time Button_1 is pressed.
+
+**NOTE**: When you create a task with the .IOC file (via the GUI), there are two fields:
+<img src="media/Create_Task.png" alt="safe-debounce" width="85%" style="display: block; margin: 0 auto;" :w
+/>
+
+<br>
+
+
 <br>
 <mark>1. How did your task ‘wait’ for the debounced button? <br>
 _______________________________________________________ </mark>
