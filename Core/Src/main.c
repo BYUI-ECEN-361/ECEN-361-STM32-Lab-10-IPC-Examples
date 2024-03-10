@@ -207,7 +207,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-  printf("\033\143"); printf("Welcome to ECEN-361 Lab-09, <student>\n\r");
+  printf("\033\143"); printf("Welcome to ECEN-361 Lab-10\n\r");
 	// Start timer
 	MultiFunctionShield_Clear();							// Clear the 7-seg display
 	HAL_TIM_Base_Start_IT(&htim17);							// LED SevenSeg cycle thru them
