@@ -76,3 +76,4 @@ Documentation/ECEN-361-Lab-10-Interprocess-Communication.docx
 *.cyclo
 *.xml
 *.o
+*.xml

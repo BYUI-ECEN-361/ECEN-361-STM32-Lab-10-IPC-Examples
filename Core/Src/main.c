@@ -50,10 +50,10 @@ TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for SemaphoreToggle */
-osThreadId_t SemaphoreToggleHandle;
-const osThreadAttr_t SemaphoreToggle_attributes = {
-  .name = "SemaphoreToggle",
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -157,7 +157,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM17_Init(void);
-void Semaphore_Toggle_Task(void *argument);
+void Default_Task(void *argument);
 void NotifyToggleTask(void *argument);
 void SW_Timer_Task(void *argument);
 void Mutex_CountUpTask(void *argument);
@@ -256,8 +256,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of SemaphoreToggle */
-  SemaphoreToggleHandle = osThreadNew(Semaphore_Toggle_Task, NULL, &SemaphoreToggle_attributes);
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(Default_Task, NULL, &defaultTask_attributes);
 
   /* creation of NotifyToggle */
   NotifyToggleHandle = osThreadNew(NotifyToggleTask, NULL, &NotifyToggle_attributes);
@@ -441,10 +441,7 @@ static void MX_GPIO_Init(void)
                           |SevenSeg_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SevenSeg_LATCH_GPIO_Port, SevenSeg_LATCH_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_D4_GPIO_Port, LED_D4_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, SevenSeg_LATCH_Pin|LED_D4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -579,28 +576,21 @@ int random_wait(int min)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_Semaphore_Toggle_Task */
+/* USER CODE BEGIN Header_Default_Task */
 /**
-  * @brief  Function implementing the SemaphoreToggle thread.
+  * @brief  Function implementing the defaultTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_Semaphore_Toggle_Task */
-void Semaphore_Toggle_Task(void *argument)
+/* USER CODE END Header_Default_Task */
+void Default_Task(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-
-	  /* USER CODE BEGIN SemaphoreToggle_Task */
-	  /* Infinite loop */
-	  for(;;)
-	  {
-		osSemaphoreAcquire(Button_1_SemaphoreHandle,100000);
-		HAL_GPIO_TogglePin(LED_D4_GPIO_Port , LED_D4_Pin);
-		osDelay(1);
-	  }
-	  /* USER CODE END SemaphoreToggle_Task */
-
+  for(;;)
+  {
+    osDelay(1);
+  }
   /* USER CODE END 5 */
 }
 
@@ -619,7 +609,7 @@ void NotifyToggleTask(void *argument)
  uint32_t *p = 0 ;
   for(;;)
   {
-	xTaskNotifyWait( 0,  0, p, 100000);
+	xTaskNotifyWait( 0,  0, p, osWaitForever);
 	HAL_GPIO_TogglePin(LED_D2_GPIO_Port , LED_D2_Pin);
     osDelay(20);
   }
@@ -639,7 +629,7 @@ void SW_Timer_Task(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreAcquire(Button_2_SemaphoreHandle,100000);
+	osSemaphoreAcquire(Button_2_SemaphoreHandle,osWaitForever);
 	  // A button push starts or stops the SW Timer
 	  // Button push is indicated by the semaphore
 	if (osTimerIsRunning(SW_Timer_7SegHandle))
@@ -664,7 +654,7 @@ void Mutex_CountUpTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  osMutexWait(UpDownMutexHandle,100000);
+	  osMutexWait(UpDownMutexHandle,osWaitForever);
 	  // Once we have it, we can start counting Up
 	  // THe count up will be some random between 200 - 300 mS
 
@@ -692,7 +682,7 @@ void Mutex_CountDownTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  osMutexWait(UpDownMutexHandle,100000);
+	  osMutexWait(UpDownMutexHandle,osWaitForever);
 	  if (mutex_protected_count<1)
 	  		mutex_protected_count=99;
 	  	else
@@ -744,9 +734,9 @@ void ResetGlobalTask(void *argument)
 		 * the MUTEX protecting the global variable
 		 * When we get it, we can reset the global to the middle
 		 */
-		osSemaphoreAcquire(Button_3_SemaphoreHandle,100000);
+		osSemaphoreAcquire(Button_3_SemaphoreHandle,osWaitForever);
 		// Now we have the semaphore because the button was pressed
-		osMutexWait(UpDownMutexHandle,100000);
+		osMutexWait(UpDownMutexHandle,osWaitForever);
 		mutex_protected_count = Protected_Count_Initial_Value ;
 		osDelay(5000);	// Wait for 5 seconds before making the resource available again
 		osMutexRelease(UpDownMutexHandle);
@@ -764,27 +754,27 @@ void ResetGlobalTask(void *argument)
 /* USER CODE END Header_StartDebounce */
 void StartDebounce(void *argument)
 {
-  /* USER CODE BEGIN StartDebounce */
+	/* USER CODE BEGIN StartDebounce */
 	uint32_t buttons_in;  // placeholder
-  /* Infinite loop */
-  for(;;)
-  {
-	  /* We wait here until there's a notification
-	   * that there's been a button and delay for debounce.
-	   * Could have done the semaphore release directly from the
-	   * ISR, BUT there wouldn't have been a debounce.  We want
-	   * the debounce done in a thread-safe way -- not holding up the ISR.
-	   * Arguments are:  bits_to_clear_entry, bits_to_clear_exit
-	   * So clear all but the top (0xfffffff8) going in, then the bottom 3 (0x7) going out
-	   *
-	   * */
-	xTaskNotifyWait( 0xfffffff8, 0x7, &buttons_in, portMAX_DELAY);
-    osDelay(30);
-    if (buttons_in & B1) { osSemaphoreRelease(Button_1_SemaphoreHandle); }
-    if (buttons_in & B2) { osSemaphoreRelease(Button_2_SemaphoreHandle); }
-    if (buttons_in & B3) { osSemaphoreRelease(Button_3_SemaphoreHandle); }
-    }
-  /* USER CODE END StartDebounce */
+	/* Infinite loop */
+	for(;;)
+	{
+		/* We wait here until there's a notification
+		 * that there's been a button and delay for debounce.
+		 * Could have done the semaphore release directly from the
+		 * ISR, BUT there wouldn't have been a debounce.  We want
+		 * the debounce done in a thread-safe way -- not holding up the ISR.
+		 * Arguments are:  bits_to_clear_entry, bits_to_clear_exit
+		 * So clear all but the top (0xfffffff8) going in, then the bottom 3 (0x7) going out
+		 *
+		 * */
+		 xTaskNotifyWait( 0xfffffff8, 0x7, &buttons_in, portMAX_DELAY);
+	     osDelay(30);
+	     if (buttons_in & B1) { osSemaphoreRelease(Button_1_SemaphoreHandle); }
+	     if (buttons_in & B2) { osSemaphoreRelease(Button_2_SemaphoreHandle); }
+	     if (buttons_in & B3) { osSemaphoreRelease(Button_3_SemaphoreHandle); }
+	 }
+	/* USER CODE END StartDebounce */
 }
 
 /* SW_Timer_Countdown function */
