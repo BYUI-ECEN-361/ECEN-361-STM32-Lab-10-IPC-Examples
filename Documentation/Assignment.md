@@ -23,6 +23,8 @@ In the provided FreeRTOS system, tasks are set up to use these
 mechanisms to communicate with each other. The mechanisms and associated
 tasks (and assignments) are described in the respective sections of the
 lab.
+
+The API's for [CMSIS-RTOS V2](https://arm-software.github.io/CMSIS_5/RTOS2/html/rtos_api2.html) and [FreeRTOS](https://www.freertos.org/a00106.html) are great resources to look for function information. Keep in mind we are using CMSIS-RTOS V2 but we included task notification functions from FreeRTOS. You can easily tell what API the function is from by its prefix, x is from FreeRTOS, os is from CMSIS-RTOS V2.
 ___
 <!--------------------------------------------------------------------------------->
 ## Part 1: RTOS-friendly debounced buttons -- Notifications and Semaphores
@@ -66,7 +68,7 @@ debounce wait, that then starts the task(s):
 
 
 >**Create a Task**<br>
-(Either use the GUI -- *Under Middleware/FreeRTOS* or manually in the code) that will toggle LED_D4 each time Button_1 is pressed.
+(Either use the GUI -- *Under Middleware/FreeRTOS* or manually in the code) that will toggle LED_D4 each time Button_1 is pressed by acquiring the semaphore.
 
 **NOTE**: When you create a task with the .IOC file (via the GUI), there are two fields:
 <img src="media/Create_Task.png" alt="safe-debounce" width="85%" style="display: block; margin: 0 auto;" :w
@@ -74,46 +76,35 @@ debounce wait, that then starts the task(s):
 
 <br>
 
+Now make sure to write the code inside of the Semaphore_Toggle_Task function that uses the provided semaphore "button_1_semaphore" to toggle LED_D4
 
 <br>
-<mark>1. How did your task ‘wait’ for the debounced button? <br>
-_______________________________________________________ </mark>
+1. How did your task ‘wait’ for the debounced button? <br>
+<mark>_______________________________________________________ </mark>
 <br>
-> <br><br>
+<br><br>
 
-><mark>2.)	How long is the time between the button interrupt coming in and it being enabled again? <br>
-_______________________________________________________ </mark>
+2.)	How long is the time between the button interrupt coming in and it being enabled again? <br>
+<mark>_______________________________________________________ </mark>
 ><br>
 > <br>
 
->**Modify Task to be Safe**<br>
-You’re given the framework of a second task (Semaphore_Toggle_D3) -- <p>
->Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they both have been created with the same Priority..<br><br>
-><mark>3.)<br>
->><mark>[x] Yes, I modified and got it working and tested it by<br>
->>_________________________________________________________________________________<br><br>
-    [ ] No, I didn't do this because  _______________________________________________________ </mark>
-><br>
-><br>
-> </p>
+>**Second Task Creation**<br>
+Now create a second task (semaphore_Toggle_D3) -- <p>
+>Modify this so that it that also waits for the same Button_1_Semaphore.  It should then toggle LED_D3 each time Button_1 is pressed.  Note that they should both have been created with the same Priority (Normal).<br><br>
 
-><mark> <br>
-4.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  <br>
->_________________________________________________________________________________<br><br>
 
-><mark> 5.)	Now change one of the priorities of these two tasks, re-compile,  and re-run. <br>
+
+3.)	Do both of (D4 and D3) toggle with a single button press?  Describe the behavior?  <br>
+<mark>_________________________________________________________________________________<br><br>
+
+4.)	Now change one of the priorities of these two tasks, re-compile,  and re-run.
 How has the behavior changed?
->_________________________________________________________________________________<br><br>
-
-<mark>
+<mark>_________________________________________________________________________________<br><br>
 
 
-
-<!--------------------------------------------------------------------------------->
-___
-<!--------------------------------------------------------------------------------->
 ## Part 2: Mutexes
-<!--------------------------------------------------------------------------------->
+
 
 Mutex's are used in embedded systems to guarantee exclusive access to a
 resource that more than one process may need to use. Examples include
@@ -131,18 +122,18 @@ a value being display on the seven-segment:
 
 <img src="media/mutex.png" alt="safe-debounce" width="85%" style="display: block; margin: 0 auto;" />
 
-The three processes on the right are all competing for access to write
+The three processes on the left are all competing for access to write
 to the protected variable. The **mutex_protected_count** is continuously
 updated to the seven-segment display on the right. The CountDown and
 CountUp are both trying at random intervals, and the Reset_MutexCount
 waits for the Button_3 (via its associated semaphore), then resets the
-current count.
+current count. The first two processes are done for you "Mutex_CountDownTask" and "Mutex_CountUpTask"
 
-<img src="media/def_sematoggle4.png" alt="safe-debounce" width="50%" style="display: block; margin: 0 auto;" />
 
 ### Part 2:  Instructions and Questions (4 pt)
 
-><mark>6.) Add another process that uses the mutex to take control and put a “—” on the Two_Digit UpDown SevenSegment Display.
+6.) Add the third process that uses the mutex to take control and put a “—” on the Two_Digit UpDown SevenSegment Display.
+
 <br>Use the following code in your process:<br>
 ><br>
 ```c
@@ -151,7 +142,7 @@ current count.
         /* This doesn't change the value, it just clears the display  */
         /* If asked to display a negative number, the function displays a "--"
         */
-        osMutexWait(UpDownMutexHandle,100000);
+        osMutexWait(UpDownMutexHandle,osWaitForever);
         MultiFunctionShield_Display_Two_Digits(-1);
         osDelay(200);
         osMutexRelease(UpDownMutexHandle);
@@ -171,7 +162,8 @@ current count.
 
 ><br>
 >9.)	Button_3 resets the mutex-protected global variable to “50.”  It too, has to wait for the mutex to be granted.<br>
-> <mark> Change the priority of the Reset to be osPriorityIdle.  This is the lowest priority available.<br>
+
+>  Change the priority of the Reset to be osPriorityIdle.  This is the lowest priority available.<br>
 ><br> Did you see any effect on the ability of Button_3 to reset the count?<br><br>
 ><mark>___________________________________________________________________________________________________________<br><br>
 >
@@ -200,10 +192,7 @@ display digit.
 >
 >9.)	 Change the timer period from the current “200” mS to something different.
 >Verify that the decrementing count changes accordingly.
->
->><mark>[x] Yes, I modified and got it working and tested it by<br>
->>_________________________________________________________________________________<br><br>
-    [ ] No, I didn't do this because  _______________________________________________________ </mark>
+
 >
 >This timer was created via the GUI  (.IOC file).  It’s type is *“osTimerPeriodic”* which means it repeats over and over.<br><br>
 What other options can a Software Timer take to change its Type and operation? <br>
