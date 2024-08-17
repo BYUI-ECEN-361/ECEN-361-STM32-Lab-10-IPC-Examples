@@ -202,7 +202,7 @@ What other options can a Software Timer take to change its Type and operation? <
 
 
 <!--------------------------------------------------------------------------------->
-## EXTRA CREDIT Ideas (5 pt. for any)
+## Ideas for Credit to get to 'A' & Extra-Credit (2 pts for any)
 <!--------------------------------------------------------------------------------->
 
 >1.	The Seven-Seg Display is currently refreshed with a hardware (TIM17) timer.  Make this more thread-safe by changing the refresh as a process that is based off a S/W timer.
