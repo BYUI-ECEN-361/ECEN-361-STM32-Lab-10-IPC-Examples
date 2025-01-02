@@ -163,7 +163,7 @@ current count. The first two processes are done for you "Mutex_CountDownTask" an
 ><br>
 >9.)	Button_3 resets the mutex-protected global variable to “50.”  It too, has to wait for the mutex to be granted.<br>
 
->  Change the priority of the Reset to be osPriorityIdle.  This is the lowest priority available.<br>
+>  Change the priority of the Reset to be osPriorityIdle.  This is the lowest priority available. Note that you will not find this priority type listed in the .ioc configuration, as it is intended to be used for idle threads. This priority must be manually set in the code.<br>
 ><br> Did you see any effect on the ability of Button_3 to reset the count?<br><br>
 ><mark>___________________________________________________________________________________________________________<br><br>
 >
@@ -194,11 +194,14 @@ display digit.
 >Verify that the decrementing count changes accordingly.
 
 >
->This timer was created via the GUI  (.IOC file).  It’s type is *“osTimerPeriodic”* which means it repeats over and over.<br><br>
+>10.) This timer was created via the GUI  (.IOC file).  It’s type is *“osTimerPeriodic”* which means it repeats over and over.<br><br>
 What other options can a Software Timer take to change its Type and operation? <br>
-><mark>10.)  ___________________________________________________________________________________________________________<br><br>
+><mark>___________________________________________________________________________________________________________<br><br>
 
-
+>11).	The debounce for the switches here used an osDelay() call (non-blocking).  Is there any advantage to using a SWTimer here instead?<br>
+> Explain why or why not?
+>
+><mark>___________________________________________________________________________________________________________<br><br>
 
 
 <!--------------------------------------------------------------------------------->
@@ -217,13 +220,10 @@ What other options can a Software Timer take to change its Type and operation? <
 >
 
 >
->3.	The debounce for the switches here used a uwDelay() non-blocking call.  Is there any advantage to using a SWTimer here instead?<br>
-> Explain why or why not?
->
-><mark>___________________________________________________________________________________________________________<br><br>
+
 
 >
->4.	Any other relevant uses for semaphores, mutexes, or S/W timers ?   Describe what you’ve done and why?
+>3.	Any other relevant uses for semaphores, mutexes, or S/W timers ?   Describe what you’ve done and why?
 >
 ><mark>___________________________________________________________________________________________________________<br><br>
 >

@@ -182,6 +182,7 @@ void SW_Timer_Countdown(void *argument);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -292,6 +293,7 @@ int main(void)
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -497,7 +499,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : LED_D4_Pin */
   GPIO_InitStruct.Pin = LED_D4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_D4_GPIO_Port, &GPIO_InitStruct);
 
@@ -754,7 +756,7 @@ void ResetGlobalTask(void *argument)
 /* USER CODE END Header_StartDebounce */
 void StartDebounce(void *argument)
 {
-	/* USER CODE BEGIN StartDebounce */
+  /* USER CODE BEGIN StartDebounce */
 	uint32_t buttons_in;  // placeholder
 	/* Infinite loop */
 	for(;;)
@@ -774,7 +776,7 @@ void StartDebounce(void *argument)
 	     if (buttons_in & B2) { osSemaphoreRelease(Button_2_SemaphoreHandle); }
 	     if (buttons_in & B3) { osSemaphoreRelease(Button_3_SemaphoreHandle); }
 	 }
-	/* USER CODE END StartDebounce */
+  /* USER CODE END StartDebounce */
 }
 
 /* SW_Timer_Countdown function */
