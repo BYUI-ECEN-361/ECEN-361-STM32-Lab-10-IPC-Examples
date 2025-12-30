@@ -16,4 +16,4 @@
 ../Core/Src/main.c:757:6:StartDebounce	4
 ../Core/Src/main.c:783:6:SW_Timer_Countdown	2
 ../Core/Src/main.c:809:6:HAL_TIM_PeriodElapsedCallback	3
-../Core/Src/main.c:830:6:Error_Handler	1
+../Core/Src/main.c:831:6:Error_Handler	1
